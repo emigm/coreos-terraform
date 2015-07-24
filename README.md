@@ -3,8 +3,8 @@
 Create plan to build the infrastructure:
 
 <pre><code>terraform plan
-    -var access_key="access key"
-    -var secret_key="secret key"
+    -var aws_access_key="access key"
+    -var aws_secret_key="secret key"
     -var etcd_cluster_discovery_url=https://discovery.etcd.io/"token"
     -var key_name="key name"
     -var key_path="key path"
@@ -15,8 +15,8 @@ Create plan to build the infrastructure:
 Apply plan to build the infrastructure:
 
 <pre><code>terraform apply
-    -var access_key="access key"
-    -var secret_key="secret key"
+    -var aws_access_key="access key"
+    -var aws_secret_key="secret key"
     -var etcd_cluster_discovery_url=https://discovery.etcd.io/"token"
     -var key_name="key name"
     -var key_path="key path"
@@ -27,8 +27,8 @@ Apply plan to build the infrastructure:
 Destroy the infrastructure:
 
 <code><pre>terraform destroy
-    -var access_key="access key"
-    -var secret_key="secret key"
+    -var aws_access_key="access key"
+    -var aws_secret_key="secret key"
     -var etcd_cluster_discovery_url=https://discovery.etcd.io/"token"
     -var key_name="key name"
     -var key_path="key path"
