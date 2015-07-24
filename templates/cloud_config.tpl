@@ -15,6 +15,16 @@ coreos:
       command: start
     - name: fleet.service
       command: start
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=etcd2.service
+            [Service]
+            Environment="FLANNEL_VER=0.5.0"
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.20.0.0/16", "Backend": {"Type": "aws-vpc"} }'
+      command: start
   update:
     group: stable
     reboot-strategy: best-effort

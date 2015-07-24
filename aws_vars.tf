@@ -1,10 +1,21 @@
 # AWS credentials
-variable "access_key" {
+variable "aws_access_key" {
     description = "AWS access key"
 }
 
-variable "secret_key" {
+variable "aws_secret_key" {
     description = "AWS secret key"
+}
+
+# AWS VPC configurations
+variable "vpc_cidr_block" {
+    description = "Entire ip range for the vpc"
+    default = "10.10.0.0/16"
+}
+
+variable "subnet_cidr_block" {
+    description = "Entire ip range for the subnet"
+    default = "10.10.1.0/24"
 }
 
 # AWS EC2 configurations
@@ -24,28 +35,23 @@ variable "amis" {
     }
 }
 
-variable "region" {
+variable "aws_region" {
     description = "The region of AWS for AMI lookups"
     default = "us-east-1"
 }
 
+variable "aws_instance_type" {
+    description = "AWS EC2 instance type"
+    default = "t2.micro"
+}
+
+# SSH key configurations
 variable "user" {
     default = {
         coreos = "core"
     }
 }
 
-variable "instance_type" {
-    description = "AWS EC2 instance type"
-    default = "t2.micro"
-}
-
-variable "tag_name" {
-    description = "Name tag for the instances"
-    default = "terraform-coreos"
-}
-
-# SSH key configurations
 variable "key_name" {
     description = "SSH key name in your AWS account for AWS intances"
 }
@@ -54,20 +60,11 @@ variable "key_path" {
     description = "Path to the private key specified by key_name variable"
 }
 
-# CoreOS cluster configurations
+# AWS cluster configurations
 variable "cluster_size" {
     description = "Number of servers in the cluster"
     default = {
         masters = "1"
         minions = "3"
     }
-}
-
-variable "etcd_cluster_discovery_url" {
-    description = "A unique etcd cluster discovery URL"
-}
-
-variable "etcd_advertised_ip_address" {
-    description = "Use $private or $public based on you cluster configuration"
-    default = "$private"
 }
