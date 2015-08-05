@@ -61,5 +61,3 @@ coreos:
   update:
     group: stable
     reboot-strategy: best-effort
-ssh-authorized-keys:
-    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQfWkkl2J5xig4MPs46OFdm6tGqivqQyjUQsq8GUNdtZh/5PVK3bDW41uDxZmGZJsoV+YTuO4SEcZVhn7jzqlo3pI6IZ0JGkAsxEvB2Hqn1i6J3RxslVr5AjiM9ElND7YIOA0O883ggibVcMn5K7uypvTBgcZtW7szSLXPXBiBDxxdYbCpq9KluQP88KCzeHGQr92EjTtFjM6jjMbgkpveRyUR8RlJaESrd+eUQWj/gRMc8MTeujxI9KKX48lTec1pvl6vao5rk/qbC8C1NiOwyVIQP9mxxICLbfBdLm7Vv/E5y8+3JaDHAcBegk1xTaTSsRZJLob08OJzgqF+Bd3F egm@elchavo
