@@ -25,6 +25,12 @@ coreos:
             Environment="FLANNEL_VER=0.5.0"
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.20.0.0/16", "Backend": {"Type": "aws-vpc"} }'
       command: start
+    - name: docker.service
+      drop-ins:
+        - name: 50-insecure-registry.conf
+          content: |
+            [Service]
+            Environment=DOCKER_OPTS='--insecure-registry="${subnet_cidr}"'
   update:
     group: stable
     reboot-strategy: best-effort

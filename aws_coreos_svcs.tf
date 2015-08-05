@@ -90,6 +90,27 @@ resource "aws_security_group_rule" "ingress_8472" {
     source_security_group_id = "${aws_security_group.flannel_sg.id}"
 }
 
+resource "aws_security_group" "docker_registry_sg" {
+    description = "Allow communication with docker registry"
+    name = "docker_registry"
+    vpc_id = "${aws_vpc.coreos_vpc.id}"
+
+    tags {
+        Name = "tf_docker_registry_sg"
+    }
+}
+
+resource "aws_security_group_rule" "ingress_5000" {
+    type = "ingress"
+    from_port = "5000"
+    to_port = "5000"
+    protocol = "tcp"
+
+    security_group_id = "${aws_security_group.docker_registry_sg.id}"
+    self = "true"
+    source_security_group_id = "${aws_security_group.coreos_sg.id}"
+}
+
 resource "aws_security_group" "outbound_sg" {
     description = "Allow all outbound traffic"
     name = "outbound"
@@ -113,13 +134,14 @@ resource "aws_security_group_rule" "egress_all" {
 }
 
 resource "template_file" "cloud_config_minion" {
-    filename = "templates/cloud_config.tpl"
+    filename = "templates/cloud_config_hosts.tpl"
     vars {
         etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
         etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
         fleet_unit_role = "minion"
         quayio_secret_key = "${var.quayio_secret_key}"
         quayio_email = "${var.quayio_email}"
+        subnet_cidr = "${aws_subnet.coreos_subnet.cidr_block}"
     }
 }
 
@@ -140,7 +162,37 @@ resource "aws_instance" "coreos_minion" {
     ]
     user_data = "${template_file.cloud_config_minion.rendered}"
 
-    tags = {
+    tags {
         Name = "tf_minion_${count.index+1}"
+    }
+}
+
+resource "template_file" "cloud_config_docker_registry" {
+    filename = "templates/cloud_config_docker_registry.tpl"
+    vars {
+        etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
+        etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
+        fleet_unit_role = "registry"
+        subnet_cidr = "${aws_subnet.coreos_subnet.cidr_block}"
+    }
+}
+
+resource "aws_instance" "coreos_docker_registry" {
+    ami = "${lookup(var.amis, var.aws_region)}"
+    associate_public_ip_address = "true"
+    instance_type = "${var.aws_instance_type}"
+    key_name = "${var.key_name}"
+    subnet_id = "${aws_subnet.coreos_subnet.id}"
+    vpc_security_group_ids = [
+        "${aws_security_group.ssh_sg.id}",
+        "${aws_security_group.coreos_sg.id}",
+        "${aws_security_group.flannel_sg.id}",
+        "${aws_security_group.docker_registry_sg.id}",
+        "${aws_security_group.outbound_sg.id}"
+    ]
+    user_data = "${template_file.cloud_config_docker_registry.rendered}"
+
+    tags {
+        Name = "tf_docker_registry"
     }
 }
