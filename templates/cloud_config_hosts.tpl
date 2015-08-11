@@ -27,21 +27,45 @@ coreos:
       command: start
     - name: docker.service
       drop-ins:
-        - name: 50-insecure-registry.conf
+        - name: 50-custom-opts.conf
           content: |
             [Service]
-            Environment=DOCKER_OPTS='--insecure-registry="${subnet_cidr}"'
+            Environment=DOCKER_OPTS="--insecure-registry=${subnet_cidr}"
+            Environment=DOCKER_OPTS="--dns=$private_ipv4"
+    - name: skydns.service
+      command: start
+      content: |
+        [Unit]
+        Description=SkyDNS
+    
+        # Requirements
+        Requires=etcd2.service
+        Requires=docker.service
+        Requires=flanneld.service
+    
+        # Dependency ordering
+        After=etcd2.service
+        After=docker.service
+        After=flanneld.service
+
+        [Service]
+        # Get CoreOS environment varialbes
+        EnvironmentFile=/etc/environment
+
+        ExecStartPre=-/usr/bin/docker kill skydns
+        ExecStartPre=-/usr/bin/docker rm skydns
+        ExecStartPre=/usr/bin/docker pull skynetservices/skydns:latest
+
+        ExecStart=/usr/bin/docker run \
+          -e SKYDNS_ADDR=$private_ipv4:53 \
+          -e SKYDNS_DOMAIN=skydns.local \
+          -e SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53 \
+          --name skydns \
+          --net host \
+          skynetservices/skydns:latest
+
+        [Install]
+        WantedBy=multi-user.target
   update:
     group: stable
     reboot-strategy: best-effort
-write_files:
-  - path: /home/core/.dockercfg
-    owner: core:core
-    permissions: 0644
-    content: |
-      {
-        "quay.io": {
-          "auth": "${quayio_secret_key}",
-          "email": "${quayio_email}"
-        }
-      }

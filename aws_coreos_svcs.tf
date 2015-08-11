@@ -121,11 +121,23 @@ resource "aws_security_group" "outbound_sg" {
     }
 }
 
-resource "aws_security_group_rule" "egress_all" {
+resource "aws_security_group_rule" "egress_all_tcp" {
     type = "egress"
     from_port = "0"
     to_port = "65535"
     protocol = "tcp"
+    cidr_blocks = [
+        "0.0.0.0/0"
+    ]
+
+    security_group_id = "${aws_security_group.outbound_sg.id}"
+}
+
+resource "aws_security_group_rule" "egress_all_udp" {
+    type = "egress"
+    from_port = "0"
+    to_port = "65535"
+    protocol = "udp"
     cidr_blocks = [
         "0.0.0.0/0"
     ]
@@ -180,6 +192,7 @@ resource "template_file" "cloud_config_docker_registry" {
 resource "aws_instance" "coreos_docker_registry" {
     ami = "${lookup(var.amis, var.aws_region)}"
     associate_public_ip_address = "true"
+    iam_instance_profile = "${aws_iam_instance_profile.rtb_updater_iam_instance_profile.name}"   
     instance_type = "${var.aws_instance_type}"
     key_name = "${var.key_name}"
     subnet_id = "${aws_subnet.coreos_subnet.id}"

@@ -27,10 +27,11 @@ coreos:
       command: start
     - name: docker.service
       drop-ins:
-        - name: 50-insecure-registry.conf
+        - name: 50-custom-opts.conf
           content: |
             [Service]
-            Environment=DOCKER_OPTS='--insecure-registry="${subnet_cidr}"'
+            Environment=DOCKER_OPTS="--insecure-registry=${subnet_cidr}"
+            Environment=DOCKER_OPTS="--dns=$private_ipv4"
     - name: docker_registry.service
       command: start
       content: |
@@ -39,9 +40,11 @@ coreos:
 
         # Requirements
         Requires=docker.service
+        Requires=flanneld.service
 
         # Dependency ordering
         After=docker.service
+        After=flanneld.service
 
         [Service]
         # Get CoreOS environment varialbes
@@ -53,13 +56,45 @@ coreos:
 
         ExecStart=/usr/bin/docker run \
             --name docker_registry \
-            -p 5000:5000 \
+            --net host \
             registry:2
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: skydns.service
+      command: start
+      content: |
+        [Unit]
+        Description=SkyDNS
+
+        # Requirements
+        Requires=etcd2.service
+        Requires=docker.service
+        Requires=flanneld.service
+
+        # Dependency ordering
+        After=etcd2.service
+        After=docker.service
+        After=flanneld.service
+
+        [Service]
+        # Get CoreOS environment varialbes
+        EnvironmentFile=/etc/environment
+
+        ExecStartPre=-/usr/bin/docker kill skydns
+        ExecStartPre=-/usr/bin/docker rm skydns
+        ExecStartPre=/usr/bin/docker pull skynetservices/skydns:latest
+
+        ExecStart=/usr/bin/docker run \
+          -e SKYDNS_ADDR=$private_ipv4:53 \
+          -e SKYDNS_DOMAIN=skydns.local \
+          -e SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53 \
+          --name skydns \
+          --net host \
+          skynetservices/skydns:latest
 
         [Install]
         WantedBy=multi-user.target
   update:
     group: stable
     reboot-strategy: best-effort
-ssh-authorized-keys:
-    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQfWkkl2J5xig4MPs46OFdm6tGqivqQyjUQsq8GUNdtZh/5PVK3bDW41uDxZmGZJsoV+YTuO4SEcZVhn7jzqlo3pI6IZ0JGkAsxEvB2Hqn1i6J3RxslVr5AjiM9ElND7YIOA0O883ggibVcMn5K7uypvTBgcZtW7szSLXPXBiBDxxdYbCpq9KluQP88KCzeHGQr92EjTtFjM6jjMbgkpveRyUR8RlJaESrd+eUQWj/gRMc8MTeujxI9KKX48lTec1pvl6vao5rk/qbC8C1NiOwyVIQP9mxxICLbfBdLm7Vv/E5y8+3JaDHAcBegk1xTaTSsRZJLob08OJzgqF+Bd3F egm@elchavo
