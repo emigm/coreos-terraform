@@ -30,8 +30,7 @@ coreos:
         - name: 50-custom-opts.conf
           content: |
             [Service]
-            Environment=DOCKER_OPTS="--insecure-registry=${subnet_cidr}"
-            Environment=DOCKER_OPTS="--dns=$private_ipv4"
+            Environment=DOCKER_OPTS='--insecure-registry="${docker_registry_record}:5000" --dns="$private_ipv4"'
     - name: skydns.service
       command: start
       content: |

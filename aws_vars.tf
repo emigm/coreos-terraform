@@ -18,9 +18,47 @@ variable "subnet_cidr_block" {
     default = "10.10.1.0/24"
 }
 
+# Route53 configurations
+variable "r53_hosted_zone" {
+    description = "Route 53 hosted zone named fsws.infra-host.com"
+    default = "Z17O81YFM57U1J"
+}
+
 # AWS EC2 configurations
-variable "amis" {
-    description = "Mapping between AWS regions and AMIs"
+variable "amis_alpha_channel" {
+    description = "Mapping between AWS regions and AMIs - CoreOS Beta Channel"
+    default = {
+        ap-northeast-1 = "ami-8a02858a"
+        ap-southeast-1 = "ami-480c051a"
+        ap-southeast-2 = "ami-33adef09"
+        eu-central-1 = "ami-7e646263"
+        eu-west-1 = "ami-6abae41d"
+        sa-east-1 = "ami-6d3cb470"
+        us-east-1 = "ami-6b8d3e00"
+        us-west-1 = "ami-0f2bd24b"
+        us-west-2 = "ami-bf495e8f"
+        us-gov-west-1 = "ami-7392f150"
+    }
+}
+
+variable "amis_beta_channel" {
+    description = "Mapping between AWS regions and AMIs - CoreOS Beta Channel"
+    default = {
+        ap-northeast-1 = "ami-0679fe06"
+        ap-southeast-1 = "ami-f40b02a6"
+        ap-southeast-2 = "ami-25a9eb1f"
+        eu-central-1 = "ami-e06660fd"
+        eu-west-1 = "ami-aa85dbdd"
+        sa-east-1 = "ami-b925ada4"
+        us-east-1 = "ami-1baa1970"
+        us-west-1 = "ami-cd36cf89"
+        us-west-2 = "ami-9d4156ad"
+        us-gov-west-1 = "ami-3b92f118"
+    }
+}
+
+variable "amis_stable_channel" {
+    description = "Mapping between AWS regions and AMIs - CoreOS Stable Channel"
     default = {
         ap-northeast-1 = "ami-1a6fca1a"   
         ap-southeast-1 = "ami-da030788"

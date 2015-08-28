@@ -148,17 +148,17 @@ resource "aws_security_group_rule" "egress_all_udp" {
 resource "template_file" "cloud_config_minion" {
     filename = "templates/cloud_config_hosts.tpl"
     vars {
+        docker_registry_record = "${aws_route53_record.docker_registry_rec.fqdn}"
         etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
         etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
         fleet_unit_role = "minion"
         quayio_secret_key = "${var.quayio_secret_key}"
         quayio_email = "${var.quayio_email}"
-        subnet_cidr = "${aws_subnet.coreos_subnet.cidr_block}"
     }
 }
 
 resource "aws_instance" "coreos_minion" {
-    ami = "${lookup(var.amis, var.aws_region)}"
+    ami = "${lookup(var.amis_stable_channel, var.aws_region)}"
     associate_public_ip_address = "true"
     iam_instance_profile = "${aws_iam_instance_profile.rtb_updater_iam_instance_profile.name}"
     instance_type = "${var.aws_instance_type}"
@@ -185,12 +185,11 @@ resource "template_file" "cloud_config_docker_registry" {
         etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
         etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
         fleet_unit_role = "registry"
-        subnet_cidr = "${aws_subnet.coreos_subnet.cidr_block}"
     }
 }
 
 resource "aws_instance" "coreos_docker_registry" {
-    ami = "${lookup(var.amis, var.aws_region)}"
+    ami = "${lookup(var.amis_stable_channel, var.aws_region)}"
     associate_public_ip_address = "true"
     iam_instance_profile = "${aws_iam_instance_profile.rtb_updater_iam_instance_profile.name}"   
     instance_type = "${var.aws_instance_type}"

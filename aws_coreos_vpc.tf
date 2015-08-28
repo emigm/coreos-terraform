@@ -29,7 +29,6 @@ resource "aws_route_table" "coreos_rtb" {
 
 resource "aws_subnet" "coreos_subnet" {
     vpc_id = "${aws_vpc.coreos_vpc.id}"
-    # availability_zone = 
     cidr_block = "${var.subnet_cidr_block}"
 
     tags {
