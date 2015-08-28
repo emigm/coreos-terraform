@@ -20,7 +20,7 @@ variable "subnet_cidr_block" {
 
 # Route53 configurations
 variable "r53_hosted_zone_id" {
-    description = "Route 53 hosted zone named fsws.infra-host.com"
+    description = "Route 53 hosted zone id"
 }
 
 # AWS EC2 configurations
