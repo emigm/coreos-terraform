@@ -106,9 +106,10 @@ resource "aws_security_group_rule" "ingress_5000" {
     to_port = "5000"
     protocol = "tcp"
 
+    cidr_blocks = [
+        "0.0.0.0/0"
+    ]
     security_group_id = "${aws_security_group.docker_registry_sg.id}"
-    self = "true"
-    source_security_group_id = "${aws_security_group.coreos_sg.id}"
 }
 
 resource "aws_security_group" "outbound_sg" {
