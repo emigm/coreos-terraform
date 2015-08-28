@@ -58,6 +58,9 @@ coreos:
             --net host \
             registry:2
 
+        Restart=always
+        RestartSec=10s
+
         [Install]
         WantedBy=multi-user.target
     - name: skydns.service
