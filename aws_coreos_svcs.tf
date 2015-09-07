@@ -203,3 +203,13 @@ resource "aws_instance" "coreos_docker_registry" {
         Name = "tf_docker_registry"
     }
 }
+
+# Output variables
+
+output "docker-registry" {
+    value =  "${aws_route53_record.docker_registry_rec.fqdn}"
+}
+
+output "minions" {
+    value =  "${join(", ", aws_instance.coreos_minion.*.public_dns)}"
+}

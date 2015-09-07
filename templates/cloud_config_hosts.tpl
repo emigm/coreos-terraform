@@ -20,8 +20,6 @@ coreos:
       drop-ins:
         - name: 50-network-config.conf
           content: |
-            [Unit]
-            Requires=etcd2.service
             [Service]
             Environment="FLANNEL_VER=0.5.0"
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.20.0.0/16", "Backend": {"Type": "aws-vpc"} }'
@@ -39,6 +37,10 @@ coreos:
 
             [Service]
             Environment=DOCKER_OPTS='--dns="$private_ipv4"'
+
+            Restart=always
+            RestartSec=10
+            TimeoutStartSec=0
     - name: skydns.service
       command: start
       content: |
@@ -48,10 +50,12 @@ coreos:
         # Requirements
         Requires=etcd2.service
         Requires=docker.service
+        Requires=flanneld.service
     
         # Dependency ordering
         After=etcd2.service
         After=docker.service
+        After=flanneld.service
 
         [Service]
         # Get CoreOS environment varialbes
