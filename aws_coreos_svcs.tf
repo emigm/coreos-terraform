@@ -149,7 +149,6 @@ resource "aws_security_group_rule" "egress_all_udp" {
 resource "template_file" "cloud_config_minion" {
     filename = "templates/cloud_config_hosts.tpl"
     vars {
-        docker_registry_record = "${aws_route53_record.docker_registry_rec.fqdn}"
         etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
         etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
         fleet_unit_role = "minion"
@@ -182,11 +181,6 @@ resource "aws_instance" "coreos_minion" {
 
 resource "template_file" "cloud_config_docker_registry" {
     filename = "templates/cloud_config_docker_registry.tpl"
-    vars {
-        etcd_cluster_discovery_url = "${var.etcd_cluster_discovery_url}"
-        etcd_advertised_ip_address = "${var.etcd_advertised_ip_address}"
-        fleet_unit_role = "registry"
-    }
 }
 
 resource "aws_instance" "coreos_docker_registry" {

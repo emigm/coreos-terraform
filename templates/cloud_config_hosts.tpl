@@ -16,6 +16,7 @@ coreos:
     - name: fleet.service
       command: start
     - name: flanneld.service
+      command: start
       drop-ins:
         - name: 50-network-config.conf
           content: |
@@ -24,13 +25,20 @@ coreos:
             [Service]
             Environment="FLANNEL_VER=0.5.0"
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.20.0.0/16", "Backend": {"Type": "aws-vpc"} }'
-      command: start
     - name: docker.service
+      command: start
       drop-ins:
         - name: 50-custom-opts.conf
           content: |
+            [Unit]
+            # Requirements
+            Requires=flanneld.service
+
+            # Dependency ordering
+            After=flanneld.service
+
             [Service]
-            Environment=DOCKER_OPTS='--insecure-registry="${docker_registry_record}:5000" --dns="$private_ipv4"'
+            Environment=DOCKER_OPTS='--dns="$private_ipv4"'
     - name: skydns.service
       command: start
       content: |
@@ -40,12 +48,10 @@ coreos:
         # Requirements
         Requires=etcd2.service
         Requires=docker.service
-        Requires=flanneld.service
     
         # Dependency ordering
         After=etcd2.service
         After=docker.service
-        After=flanneld.service
 
         [Service]
         # Get CoreOS environment varialbes
@@ -62,6 +68,10 @@ coreos:
           --name skydns \
           --net host \
           skynetservices/skydns:latest
+
+        Restart=always
+        RestartSec=10
+        TimeoutStartSec=0
 
         [Install]
         WantedBy=multi-user.target

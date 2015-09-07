@@ -7,4 +7,3 @@ variable "etcd_advertised_ip_address" {
     description = "Use $private or $public based on you cluster configuration"
     default = "$private"
 }
-
