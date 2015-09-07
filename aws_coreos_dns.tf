@@ -7,3 +7,9 @@ resource "aws_route53_record" "docker_registry_rec" {
     ttl = "300"
     type = "A"
 }
+
+# Output variables
+
+output "docker-registry" {
+    value =  "${aws_route53_record.docker_registry_rec.fqdn}"
+}

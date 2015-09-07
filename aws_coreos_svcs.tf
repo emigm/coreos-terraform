@@ -112,6 +112,26 @@ resource "aws_security_group_rule" "ingress_5000" {
     security_group_id = "${aws_security_group.docker_registry_sg.id}"
 }
 
+resource "aws_security_group" "webapp_sg" {
+    description = "Allow communications between with the web applications"
+    name = "webapp"
+    vpc_id = "${aws_vpc.coreos_vpc.id}"
+
+    tags {
+        Name = "tf_webapp_sg"
+    }
+}
+
+resource "aws_security_group_rule" "ingress_8080" {
+    type = "ingress"
+    from_port = "8080"
+    to_port = "8080"
+    protocol = "tcp"
+
+    security_group_id = "${aws_security_group.webapp_sg.id}"
+    source_security_group_id = "${aws_security_group.webapp_sg.id}" 
+}
+
 resource "aws_security_group" "outbound_sg" {
     description = "Allow all outbound traffic"
     name = "outbound"
@@ -170,7 +190,8 @@ resource "aws_instance" "coreos_minion" {
         "${aws_security_group.ssh_sg.id}",
         "${aws_security_group.coreos_sg.id}",
         "${aws_security_group.flannel_sg.id}",
-        "${aws_security_group.outbound_sg.id}"
+        "${aws_security_group.outbound_sg.id}",
+        "${aws_security_group.webapp_sg.id}"
     ]
     user_data = "${template_file.cloud_config_minion.rendered}"
 
@@ -205,10 +226,6 @@ resource "aws_instance" "coreos_docker_registry" {
 }
 
 # Output variables
-
-output "docker-registry" {
-    value =  "${aws_route53_record.docker_registry_rec.fqdn}"
-}
 
 output "minions" {
     value =  "${join(", ", aws_instance.coreos_minion.*.public_dns)}"
