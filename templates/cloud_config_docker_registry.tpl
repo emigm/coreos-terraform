@@ -29,6 +29,8 @@ coreos:
             --net host \
             registry:2
 
+        ExecStop=/usr/bin/docker stop docker_registry
+
         Restart=always
         RestartSec=10
         TimeoutStartSec=0

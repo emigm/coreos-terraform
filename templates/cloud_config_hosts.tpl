@@ -73,6 +73,8 @@ coreos:
           --net host \
           skynetservices/skydns:latest
 
+        ExecStop=/usr/bin/docker stop skydns
+
         Restart=always
         RestartSec=10
         TimeoutStartSec=0
